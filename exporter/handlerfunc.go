@@ -25,7 +25,8 @@ func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraPa
 	}
 
 	if params["target"] == "" {
-		level.Warn(logger).Log("msg", "No target specified. Scraping default target")
+		level.Warn(logger).Log("msg", "No target specified.")
+		return
 	} else {
 		level.Debug(logger).Log("msg", fmt.Sprintf("Scraping %s", params))
 	}
