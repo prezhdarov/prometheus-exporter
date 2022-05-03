@@ -24,7 +24,7 @@ func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraPa
 		params[param] = p.Get(param)
 	}
 
-	if params["target"] == "" {
+	if target == "" {
 		level.Warn(logger).Log("msg", "No target specified.")
 		return
 	} else {
