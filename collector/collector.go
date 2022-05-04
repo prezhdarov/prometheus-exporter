@@ -11,9 +11,9 @@ import (
 )
 
 type ClientAPI interface {
-	Login(target string) error
-	Logout() error
-	Get(params map[string]string) (*[]byte, error)
+	Login(target string, logger log.Logger) error
+	Logout(logger log.Logger) error
+	Get(params map[string]string, logger log.Logger) (*[]byte, error)
 	GetTarget() string
 }
 
@@ -25,7 +25,7 @@ type ScrapeMetrics struct {
 // Collector is the interface a collector has to implement.
 type Collector interface {
 	// Get new metrics and expose them via prometheus registry.
-	Update(ch chan<- prometheus.Metric, namespace string, client ClientAPI, params map[string]string) error
+	Update(ch chan<- prometheus.Metric, namespace string, client ClientAPI, params map[string]string, logger log.Logger) error
 }
 
 type CollectorSet struct {

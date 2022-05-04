@@ -17,7 +17,7 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 
 	client := cs.client
 
-	if err := client.Login(cs.target); err != nil {
+	if err := client.Login(cs.target, cs.logger); err != nil {
 
 		level.Error(cs.logger).Log("msg", "Login failed", "target", client.GetTarget(), "err", err)
 		return
@@ -42,7 +42,7 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 
 	wg.Wait()
 
-	if err := client.Logout(); err != nil {
+	if err := client.Logout(cs.logger); err != nil {
 
 		level.Error(cs.logger).Log("msg", "Logout failed", "target", client.GetTarget(), "err", err)
 
@@ -54,7 +54,7 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 func run(name, namespace string, c Collector, ch chan<- prometheus.Metric, params *map[string]string, client ClientAPI, sm *ScrapeMetrics, logger log.Logger) {
 	begin := time.Now()
 
-	err := c.Update(ch, namespace, client, *params)
+	err := c.Update(ch, namespace, client, *params, logger)
 
 	duration := time.Since(begin)
 
