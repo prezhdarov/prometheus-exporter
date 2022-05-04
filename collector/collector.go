@@ -1,9 +1,11 @@
 package collector
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -103,6 +105,8 @@ func NewCollectorSet(namespace, target string, params map[string]string, logger 
 		}
 
 	}
+
+	level.Debug(logger).Log("msg", fmt.Sprintf("target: %s", target))
 
 	return &CollectorSet{
 		Collectors:    collectors,
