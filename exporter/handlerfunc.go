@@ -10,15 +10,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-//var extraParams = flag.String("extra.parameters", "", "Additional /probe parameters to pass to collector modules")
-
 func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraParams string, logger log.Logger) {
 
 	p := r.URL.Query()
 
 	target := p.Get("target")
-
-	level.Debug(logger).Log("msg", fmt.Sprintf("target: %s", target))
 
 	params := make(map[string]string)
 
