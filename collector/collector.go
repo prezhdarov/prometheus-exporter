@@ -44,14 +44,14 @@ const (
 )
 
 var (
-	registeredClientAPI    ClientAPI
+	registeredClientAPI    *ClientAPI
 	factories              = make(map[string]func(logger log.Logger) (Collector, error))
 	collectorState         = make(map[string]*bool)
 	initiatedCollectorsMtx = sync.Mutex{}
 	initiatedCollectors    = make(map[string]Collector)
 )
 
-func RegisterAPI(clientAPI ClientAPI) {
+func RegisterAPI(clientAPI *ClientAPI) {
 	registeredClientAPI = clientAPI
 }
 
@@ -110,7 +110,7 @@ func NewCollectorSet(namespace, target string, params map[string]string, logger 
 
 	return &CollectorSet{
 		Collectors:    collectors,
-		client:        registeredClientAPI,
+		client:        *registeredClientAPI,
 		target:        target,
 		namespace:     namespace,
 		extraParams:   params,
