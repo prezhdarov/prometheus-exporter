@@ -13,6 +13,8 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 
 	begin := time.Now()
 
+	level.Debug(cs.logger).Log("msg", "Attempting logging", "target", cs.target)
+
 	client := cs.client
 
 	if err := client.Login(cs.target); err != nil {
