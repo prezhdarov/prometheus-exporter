@@ -36,6 +36,8 @@ func (h *eHandler) New(namespace, target string, params map[string]string) (http
 		return promhttp.Handler(), nil
 	}
 
+	level.Debug(h.logger).Log("msg", fmt.Sprintf("target: %s", target))
+
 	cl, err := collector.NewCollectorSet(namespace, target, params, h.logger)
 	if err != nil {
 		return nil, fmt.Errorf("could not create %s collector: %s", namespace, err)

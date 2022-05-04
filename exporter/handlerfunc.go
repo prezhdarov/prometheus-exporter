@@ -18,7 +18,7 @@ func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraPa
 
 	target := p.Get("target")
 
-	level.Debug(logger).Log("msg", fmt.Sprintf("url: %s", r.URL.RawPath))
+	level.Debug(logger).Log("msg", fmt.Sprintf("target: %s", target))
 
 	params := make(map[string]string)
 
