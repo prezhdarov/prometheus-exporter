@@ -18,6 +18,8 @@ func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraPa
 
 	target := p.Get("target")
 
+	level.Debug(logger).Log("msg", fmt.Sprintf("url: %s", r.URL.RawPath))
+
 	params := make(map[string]string)
 
 	for _, param := range strings.Split(extraParams, ",") {
