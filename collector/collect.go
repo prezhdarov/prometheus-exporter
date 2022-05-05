@@ -33,7 +33,7 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 	wg.Add(len(cs.Collectors))
 	for name, c := range cs.Collectors {
 		go func(name string, c Collector) {
-			run(name, cs.namespace, c, ch, &cs.extraParams, cs.client, &cs.ScrapeMetrics, cs.logger)
+			run(name, cs.namespace, c, ch, &cs.extraParams, client, &cs.ScrapeMetrics, cs.logger)
 			wg.Done()
 		}(name, c)
 	}
