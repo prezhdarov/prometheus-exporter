@@ -5,7 +5,7 @@ import (
 	stdlog "log"
 	"net/http"
 
-	"forti-exporter/libs/collector"
+	"github.com/prezhdarov/prometheus-exporter/collector"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
