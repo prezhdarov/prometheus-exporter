@@ -9,10 +9,9 @@ import (
 )
 
 type ClientAPI interface {
-	Login(target string, logger log.Logger) error
-	Logout(logger log.Logger) error
-	Get(params map[string]string, logger log.Logger) (*[]byte, error)
-	GetTarget() string
+	Login(target string) (map[string]interface{}, error)
+	Logout(loginData map[string]interface{}) error
+	Get(loginData, extraConfig map[string]interface{}) (*[]byte, error)
 }
 
 type ScrapeMetrics struct {
@@ -22,13 +21,12 @@ type ScrapeMetrics struct {
 
 // Collector is the interface a collector has to implement.
 type Collector interface {
-	// Get new metrics and expose them via prometheus registry.
-	Update(ch chan<- prometheus.Metric, namespace string, client ClientAPI, params map[string]string, logger log.Logger) error
+	Update(ch chan<- prometheus.Metric, namespace string, clientAPI ClientAPI, clientData map[string]interface{}, extraParams map[string]string) error
 }
 
 type CollectorSet struct {
 	Collectors    map[string]Collector
-	client        ClientAPI
+	clientAPI     ClientAPI
 	target        string
 	namespace     string
 	extraParams   map[string]string
@@ -58,7 +56,7 @@ func RegisterCollector(collector string, flag bool, factory func(logger log.Logg
 	factories[collector] = factory
 }
 
-func NewCollectorSet(namespace, target string, params map[string]string, logger log.Logger) (*CollectorSet, error) {
+func NewCollectorSet(namespace, target string, params map[string]string, logger log.Logger) (CollectorSet, error) {
 
 	var sm ScrapeMetrics
 
@@ -93,7 +91,7 @@ func NewCollectorSet(namespace, target string, params map[string]string, logger 
 		} else {
 			collector, err := factories[key](log.With(logger, "collector", key))
 			if err != nil {
-				return nil, err
+				return CollectorSet{}, err
 			}
 
 			collectors[key] = collector
@@ -104,9 +102,9 @@ func NewCollectorSet(namespace, target string, params map[string]string, logger 
 
 	}
 
-	return &CollectorSet{
+	return CollectorSet{
 		Collectors:    collectors,
-		client:        registeredClientAPI,
+		clientAPI:     registeredClientAPI,
 		target:        target,
 		namespace:     namespace,
 		extraParams:   params,

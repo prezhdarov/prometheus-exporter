@@ -5,7 +5,7 @@ import (
 	stdlog "log"
 	"net/http"
 
-	"github.com/prezhdarov/prometheus-exporter/collector"
+	"forti-exporter/libs/collector"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
@@ -43,7 +43,7 @@ func (h *eHandler) New(namespace, target string, params map[string]string) (http
 
 	registry := prometheus.NewRegistry()
 	registry.MustRegister(version.NewCollector(fmt.Sprintf("%s_exporter", namespace)))
-	if err := registry.Register(cl); err != nil {
+	if err := registry.Register(&cl); err != nil {
 		return nil, fmt.Errorf("could not register %s collector: %s", namespace, err)
 	}
 
