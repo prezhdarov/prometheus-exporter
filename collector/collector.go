@@ -11,7 +11,7 @@ import (
 type ClientAPI interface {
 	Login(target string) (map[string]interface{}, error)
 	Logout(loginData map[string]interface{}) error
-	Get(loginData, extraConfig map[string]interface{}) (*[]byte, error)
+	Get(loginData, extraConfig map[string]interface{}) (interface{}, error)
 }
 
 type ScrapeMetrics struct {
