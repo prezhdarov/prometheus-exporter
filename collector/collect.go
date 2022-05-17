@@ -25,6 +25,8 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 
 	}
 
+	ch <- prometheus.MustNewConstMetric(cs.ScrapeMetrics.Duration, prometheus.GaugeValue, time.Since(begin).Seconds(), "login") //Not really a collector, but helps get overall timing better
+
 	wg := sync.WaitGroup{}
 
 	level.Debug(cs.logger).Log("msg", fmt.Sprintf("number of collectors to scrape: %d", len(cs.Collectors)))
@@ -57,6 +59,8 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 
 	wg.Wait()
 
+	lobegin := time.Now()
+
 	if err := cs.clientAPI.Logout(clientData); err != nil {
 
 		level.Error(cs.logger).Log("msg", "Logout failed", "target", clientData["target"], "err", err)
@@ -66,6 +70,8 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 		level.Debug(cs.logger).Log("msg", "Logout successful", "target", clientData["target"])
 
 	}
+
+	ch <- prometheus.MustNewConstMetric(cs.ScrapeMetrics.Duration, prometheus.GaugeValue, time.Since(lobegin).Seconds(), "logout") //Same as Login above
 
 	ch <- prometheus.MustNewConstMetric(cs.ScrapeMetrics.Duration, prometheus.GaugeValue, time.Since(begin).Seconds(), "all_collectors")
 }
