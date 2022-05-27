@@ -55,7 +55,7 @@ var (
 func isFlagPassed(name string) bool {
 	found := false
 	flag.Visit(func(f *flag.Flag) {
-		if f.Name == name {
+		if f.Name == fmt.Sprintf("collector.%s", name) {
 			found = true
 		}
 	})
