@@ -53,8 +53,9 @@ func RegisterAPI(clientAPI ClientAPI) {
 	registeredClientAPI = clientAPI
 }
 
-func RegisterCollector(collector string, flag bool, factory func(logger log.Logger) (Collector, error)) {
-	collectorState[collector] = &flag
+func RegisterCollector(collector string, flag *bool, factory func(logger log.Logger) (Collector, error)) {
+
+	collectorState[collector] = flag
 	factories[collector] = factory
 }
 
