@@ -1,9 +1,11 @@
 package collector
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -83,8 +85,11 @@ func NewCollectorSet(namespace, target string, params map[string]string, logger 
 	for key, enabled := range collectorState {
 
 		if !*enabled || (len(f) > 0 && !f[key]) {
+			level.Debug(logger).Log("msg", fmt.Sprintf("Collector %s is disabled", key))
 			continue
 		}
+
+		level.Debug(logger).Log("msg", fmt.Sprintf("Collector %s is enabled", key))
 
 		if collector, ok := initiatedCollectors[key]; ok {
 			collectors[key] = collector
