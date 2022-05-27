@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"flag"
 	"fmt"
 	"sync"
 
@@ -41,6 +42,8 @@ const (
 	DefaultDisabled = false
 )
 
+var disableDefaultCollector = flag.Bool("disable.default.collectors", DefaultDisabled, "If set only explicitly enabled collectors will be enabled")
+
 var (
 	registeredClientAPI    ClientAPI
 	factories              = make(map[string]func(logger log.Logger) (Collector, error))
@@ -48,6 +51,24 @@ var (
 	initiatedCollectorsMtx = sync.Mutex{}
 	initiatedCollectors    = make(map[string]Collector)
 )
+
+func isFlagPassed(name string) bool {
+	found := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			found = true
+		}
+	})
+	return found
+}
+
+func disableDefaultCollectors() {
+	for collector, _ := range collectorState {
+		if !isFlagPassed(collector) {
+			*collectorState[collector] = false
+		}
+	}
+}
 
 func RegisterAPI(clientAPI ClientAPI) {
 	registeredClientAPI = clientAPI
@@ -82,6 +103,10 @@ func NewCollectorSet(namespace, target string, params map[string]string, logger 
 
 	initiatedCollectorsMtx.Lock()
 	defer initiatedCollectorsMtx.Unlock()
+
+	if *disableDefaultCollector {
+		disableDefaultCollectors()
+	}
 
 	for key, enabled := range collectorState {
 
