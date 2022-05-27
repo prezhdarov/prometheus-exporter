@@ -111,11 +111,11 @@ func NewCollectorSet(namespace, target string, params map[string]string, logger 
 	for key, enabled := range collectorState {
 
 		if !*enabled || (len(f) > 0 && !f[key]) {
-			level.Debug(logger).Log("msg", fmt.Sprintf("Collector %s is disabled", key))
+			level.Debug(logger).Log("msg", fmt.Sprintf("%s is disabled", key))
 			continue
 		}
 
-		level.Debug(logger).Log("msg", fmt.Sprintf("Collector %s is enabled", key))
+		level.Debug(logger).Log("msg", fmt.Sprintf("%s is enabled", key))
 
 		if collector, ok := initiatedCollectors[key]; ok {
 			collectors[key] = collector
