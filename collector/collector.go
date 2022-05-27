@@ -63,7 +63,7 @@ func isFlagPassed(name string) bool {
 }
 
 func disableDefaultCollectors() {
-	for collector, _ := range collectorState {
+	for collector := range collectorState {
 		if !isFlagPassed(collector) {
 			*collectorState[collector] = false
 		}
