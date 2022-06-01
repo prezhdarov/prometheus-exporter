@@ -34,9 +34,10 @@ func Parse() {
 
 	})
 
-	if *file != "" {
+	var fileFlags map[string]string
 
-		var fileFlags map[string]string
+	//If file set, read the thing
+	if *file != "" {
 
 		content, err := ioutil.ReadFile(*file)
 		if err != nil {
@@ -46,25 +47,25 @@ func Parse() {
 		if err = yaml.Unmarshal(content, &fileFlags); err != nil {
 			log.Fatalf("cannot read contents of %s - error: %s", *file, err)
 		}
+	}
 
-		//Now see if any of the flags are already set and if not if there's flags in the file.
-		flag.VisitAll(func(f *flag.Flag) {
+	//Now see if any of the flags are already set and if not if there's flags in the file.
+	flag.VisitAll(func(f *flag.Flag) {
 
-			if flagsSet[f.Name] {
+		if flagsSet[f.Name] {
+			return
+		}
+
+		if _, exists := fileFlags[f.Name]; exists {
+
+			if err := flag.Set(f.Name, fileFlags[f.Name]); err != nil {
+				log.Fatalf("cannot set flag %s to %q, which is read from environment variable %q: %s", f.Name, fileFlags[f.Name], f.Name, err)
 				return
 			}
+			flagsSet[f.Name] = true
+		}
 
-			if _, exists := fileFlags[f.Name]; exists {
-
-				if err := flag.Set(f.Name, fileFlags[f.Name]); err != nil {
-					log.Fatalf("cannot set flag %s to %q, which is read from environment variable %q: %s", f.Name, fileFlags[f.Name], f.Name, err)
-					return
-				}
-				flagsSet[f.Name] = true
-			}
-
-		})
-	}
+	})
 
 	//Finally for all flags that are not set yet, see if there's corresponding env flag set and get it.
 	flag.VisitAll(func(f *flag.Flag) {
