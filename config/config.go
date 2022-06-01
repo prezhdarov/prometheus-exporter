@@ -3,24 +3,30 @@ package config
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 var (
 	enable = flag.Bool("envflag.enable", false, "Whether to enable reading flags from environment variables additionally to command line. "+
-		"Command line flag values have priority over values from environment vars. "+
+		"Command line flag and file values (if -file is set) have priority over values from environment vars. "+
 		"Flags are read only from command line if this flag isn't set.")
 	prefix = flag.String("envflag.prefix", "", "Prefix for environment variables if -envflag.enable is set")
+
+	file = flag.String("file", "", "Path to file with configuration data.")
 )
 
 func Parse() {
 	flag.Parse()
-	if !*enable {
+	if !*enable || *file == "" {
 		return
 	}
 
+	// Get all flags set on the command line
 	flagsSet := make(map[string]bool)
 	flag.Visit(func(f *flag.Flag) {
 
@@ -28,6 +34,39 @@ func Parse() {
 
 	})
 
+	if *file != "" {
+
+		var fileFlags map[string]string
+
+		content, err := ioutil.ReadFile(*file)
+		if err != nil {
+			log.Fatalf("cannot read file %s - error: %s", *file, err)
+		}
+
+		if err = yaml.Unmarshal(content, &fileFlags); err != nil {
+			log.Fatalf("cannot read contents of %s - error: %s", *file, err)
+		}
+
+		//Now see if any of the flags are already set and if not if there's flags in the file.
+		flag.VisitAll(func(f *flag.Flag) {
+
+			if flagsSet[f.Name] {
+				return
+			}
+
+			if _, exists := fileFlags[f.Name]; exists {
+
+				if err := flag.Set(f.Name, fileFlags[f.Name]); err != nil {
+					log.Fatalf("cannot set flag %s to %q, which is read from environment variable %q: %s", f.Name, fileFlags[f.Name], f.Name, err)
+					return
+				}
+				flagsSet[f.Name] = true
+			}
+
+		})
+	}
+
+	//Finally for all flags that are not set yet, see if there's corresponding env flag set and get it.
 	flag.VisitAll(func(f *flag.Flag) {
 
 		if flagsSet[f.Name] {
