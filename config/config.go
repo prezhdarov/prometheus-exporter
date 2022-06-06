@@ -21,10 +21,8 @@ var (
 )
 
 func Parse() {
+
 	flag.Parse()
-	if !*enable || *file == "" {
-		return
-	}
 
 	// Get all flags set on the command line
 	flagsSet := make(map[string]bool)
@@ -47,45 +45,50 @@ func Parse() {
 		if err = yaml.Unmarshal(content, &fileFlags); err != nil {
 			log.Fatalf("cannot read contents of %s - error: %s", *file, err)
 		}
-	}
 
-	//Now see if any of the flags are already set and if not if there's flags in the file.
-	flag.VisitAll(func(f *flag.Flag) {
+		//Now see if any of the flags are already set and if not if there's flags in the file.
+		flag.VisitAll(func(f *flag.Flag) {
 
-		if flagsSet[f.Name] {
-			return
-		}
-
-		if _, exists := fileFlags[f.Name]; exists {
-
-			if err := flag.Set(f.Name, fileFlags[f.Name]); err != nil {
-				log.Fatalf("cannot set flag %s to %q, which is read from environment variable %q: %s", f.Name, fileFlags[f.Name], f.Name, err)
+			if flagsSet[f.Name] {
 				return
 			}
-			flagsSet[f.Name] = true
-		}
 
-	})
+			if _, exists := fileFlags[f.Name]; exists {
 
-	//Finally for all flags that are not set yet, see if there's corresponding env flag set and get it.
-	flag.VisitAll(func(f *flag.Flag) {
-
-		if flagsSet[f.Name] {
-
-			return
-
-		}
-		fname := getEnvFlagName(f.Name)
-		if v, ok := os.LookupEnv(fname); ok {
-
-			if err := flag.Set(f.Name, v); err != nil {
-
-				log.Fatalf("cannot set flag %s to %q, which is read from environment variable %q: %s", f.Name, v, fname, err)
-
+				if err := flag.Set(f.Name, fileFlags[f.Name]); err != nil {
+					log.Fatalf("cannot set flag %s to %q, which is read from environment variable %q: %s", f.Name, fileFlags[f.Name], f.Name, err)
+					return
+				}
+				flagsSet[f.Name] = true
 			}
 
-		}
-	})
+		})
+
+	}
+
+	if *enable {
+
+		//Finally for all flags that are not set yet, see if there's corresponding env flag set and get it.
+		flag.VisitAll(func(f *flag.Flag) {
+
+			if flagsSet[f.Name] {
+
+				return
+
+			}
+			fname := getEnvFlagName(f.Name)
+			if v, ok := os.LookupEnv(fname); ok {
+
+				if err := flag.Set(f.Name, v); err != nil {
+
+					log.Fatalf("cannot set flag %s to %q, which is read from environment variable %q: %s", f.Name, v, fname, err)
+
+				}
+
+			}
+		})
+	}
+
 }
 
 func getEnvFlagName(s string) string {
