@@ -53,6 +53,15 @@ example-exporter collects metrics data from a fictional API.
 	config.Usage(s)
 }
 
+func webConfig(listenAddress *string) *web.FlagConfig {
+
+	listenAddresses := []string{*listenAddress}
+	systemSocket := false
+	configFile := ""
+
+	return &web.FlagConfig{&listenAddresses, &systemSocket, &configFile}
+}
+
 func main() {
 
 	flag.CommandLine.SetOutput(os.Stdout)
@@ -84,9 +93,9 @@ func main() {
 
 	level.Info(logger).Log("msg", "listening on", "address", listenAddress)
 
-	server := &http.Server{Addr: *listenAddress}
+	server := &http.Server{}
 
-	if err := web.ListenAndServe(server, "", logger); err != nil {
+	if err := web.ListenAndServe(server, webConfig(listenAddress), logger); err != nil {
 		level.Error(logger).Log("err", err)
 		os.Exit(1)
 	}
