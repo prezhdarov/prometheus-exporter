@@ -47,7 +47,7 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 				level.Error(cs.logger).Log("msg", "collector failed", "name", name, "duration_seconds", duration.Seconds(), "err", err)
 				success = 0
 			} else {
-				level.Debug(cs.logger).Log("msg", "collector scraped successfuly", "target", clientData["target"].(string), "name", name, "duration", duration.Seconds())
+				level.Debug(cs.logger).Log("msg", "collector scraped successfully", "target", clientData["target"].(string), "name", name, "duration", duration.Seconds())
 				success = 1
 			}
 			ch <- prometheus.MustNewConstMetric(cs.ScrapeMetrics.Duration, prometheus.GaugeValue, duration.Seconds(), name)
