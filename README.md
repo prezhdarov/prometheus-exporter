@@ -18,6 +18,6 @@ This is the where main() lives. Follow the comments in the example-exporter.go t
 
 This is where the target consumption takes place. The client (APIClient) requires three methods - a login, a get and a logout functions - to authenticate, read and clean any loose ends for every scrape. Follow the comments in file to create your own.
 
-### A set of collectors (example has only one in collcectors/example.go)
+### A set of collectors (example has only one in collectors/example.go)
 
 This is a set of metrics collectors sharing a package name. Each collector executes concurrently and must have unique name and needs an update method which will be called by the Collect function. Again, follow the comments to create your own collector.
