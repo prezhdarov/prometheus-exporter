@@ -3,11 +3,12 @@ package config
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 
+	"github.com/prometheus/common/promlog"
+	"github.com/prometheus/exporter-toolkit/web"
 	"gopkg.in/yaml.v2"
 )
 
@@ -37,7 +38,7 @@ func Parse() {
 	//If file set, read the thing
 	if *file != "" {
 
-		content, err := ioutil.ReadFile(*file)
+		content, err := os.ReadFile(*file)
 		if err != nil {
 			log.Fatalf("cannot read file %s - error: %s", *file, err)
 		}
@@ -91,12 +92,22 @@ func Parse() {
 
 }
 
-func getEnvFlagName(s string) string {
-	s = strings.ReplaceAll(s, ".", "_")
-	return *prefix + s
+func SetLogger(lf, ll *string) *promlog.Config {
+	promlogFormat := &promlog.AllowedFormat{}
+	promlogFormat.Set(*lf)
+
+	promlogLevel := &promlog.AllowedLevel{}
+	promlogLevel.Set(*ll)
+
+	promlogConfig := &promlog.Config{}
+	promlogConfig.Format = promlogFormat
+	promlogConfig.Level = promlogLevel
+
+	return promlogConfig
 }
 
 func Usage(s string) {
+
 	f := flag.CommandLine.Output()
 	fmt.Fprintf(f, "%s\n", s)
 	if hasHelpFlag(os.Args[1:]) {
@@ -104,6 +115,26 @@ func Usage(s string) {
 	} else {
 		fmt.Fprintf(f, `Run "%s -help" in order to see the description for all the available flags`+"\n", os.Args[0])
 	}
+}
+
+func WebConfig(listenAddress *string) *web.FlagConfig {
+
+	var webConfig web.FlagConfig
+
+	listenAddresses := []string{*listenAddress}
+	systemSocket := false
+	configFile := ""
+
+	webConfig.WebListenAddresses = &listenAddresses
+	webConfig.WebSystemdSocket = &systemSocket
+	webConfig.WebConfigFile = &configFile
+
+	return &webConfig
+}
+
+func getEnvFlagName(s string) string {
+	s = strings.ReplaceAll(s, ".", "_")
+	return *prefix + s
 }
 
 func hasHelpFlag(args []string) bool {
