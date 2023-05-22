@@ -54,7 +54,7 @@ func (c *testCollector) Update(ch chan<- prometheus.Metric, namespace string, cl
 		time.Now(), prometheus.MustNewConstMetric(
 			prometheus.NewDesc(
 				prometheus.BuildFQName(namespace, testSubsystem, "some_fake_metric_with_time"),
-				"This is a fake metric... but is it?", nil, nil,
+				"This is also a fake metric... with a timestamp!", nil, nil,
 			), prometheus.GaugeValue, 1.0,
 		),
 	)
