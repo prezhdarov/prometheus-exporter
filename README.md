@@ -1,6 +1,7 @@
 # prometheus-exporter
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/prezhdarov/prometheus-exporter)](https://goreportcard.com/report/github.com/prezhdarov/prometheus-exporter)
+![example-exporter](https://github.com/prezhdarov/prometheus-exporter/blob/master/.github/workflows/go.yml/badge.svg)
 
 Set of tools and libraries to help build prometheus exporters of diuerse kind..
 
