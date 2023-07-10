@@ -12,9 +12,9 @@ var (
 	// This is example of all things necessary for simple http (REST anyone?) API configuration. Get all these defined and let the feast begin.
 	apiUser   = flag.String("api.username", "", "Username to login")
 	apiPasswd = flag.String("api.password", "", "Password for the user above")
-	apiServer = flag.String("vmware.vcenter", "", "Server address in host:port format.")
-	apiSchema = flag.String("vmware.schema", "https", "Use HTTP or HTTPS")
-	apiSSL    = flag.Bool("vmware.ssl", false, "Trust SSL or trust")
+	apiServer = flag.String("api.server", "", "Server address in host:port format.")
+	apiSchema = flag.String("api.schema", "https", "Use HTTP or HTTPS")
+	apiSSL    = flag.Bool("api.ssl", false, "Trust SSL or trust")
 )
 
 // Nothing to see here..
