@@ -44,7 +44,7 @@ func NewAPI() *APIClient {
 
 // The Login function. Takes a target name or address as input and returns a map where anything can be stored. From API key to set of cookes - you name it.
 // Not sure this - the return map of string and anything -  is as elegant as I want it to be, but quite handy.
-func (vm *APIClient) Login(target string) (map[string]interface{}, error) {
+func (vm *APIClient) Login(target string, logger log.Logger) (map[string]interface{}, error) {
 
 	loginData := make(map[string]interface{}, 0)
 
@@ -54,20 +54,26 @@ func (vm *APIClient) Login(target string) (map[string]interface{}, error) {
 
 	}
 
+	level.Info(logger).Log("msg", "Logged in successfully")
+
 	loginData["target"] = target
 
 	return loginData, nil
 }
 
 // The Logout - just pass the map created in Login... Your logout should know what to do with it (if anything at all)
-func (vm *APIClient) Logout(loginData map[string]interface{}) error {
+func (vm *APIClient) Logout(loginData map[string]interface{}, logger log.Logger) error {
+
+	level.Info(logger).Log("msg", "Logged in successfully")
 
 	return nil
 
 }
 
 // This one can return virtually anything... and an error. To each (API and exporter) their own as they say.
-func (vm *APIClient) Get(loginData, extraConfig map[string]interface{}) (interface{}, error) {
+func (vm *APIClient) Get(loginData, extraConfig map[string]interface{}, logger log.Logger) (interface{}, error) {
+
+	level.Info(logger).Log("msg", "Ran GET successfully")
 
 	return nil, nil
 

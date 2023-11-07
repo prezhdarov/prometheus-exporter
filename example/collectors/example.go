@@ -41,6 +41,10 @@ func NewTestCollector(logger log.Logger) (collector.Collector, error) {
 // This is where the magic happens. Here clientAPI.Get can be consumed and metrics created with the result and pushed out.
 func (c *testCollector) Update(ch chan<- prometheus.Metric, namespace string, clientAPI collector.ClientAPI, loginData map[string]interface{}, params map[string]string) error {
 
+	extraConfig := make(map[string]interface{}, 0)
+
+	clientAPI.Get(loginData, extraConfig, c.logger)
+
 	// This is a simple metric of type Gauge (could be Counter for all it matters too).
 	ch <- prometheus.MustNewConstMetric(
 		prometheus.NewDesc(

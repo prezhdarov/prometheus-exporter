@@ -12,9 +12,9 @@ import (
 )
 
 type ClientAPI interface {
-	Login(target string) (map[string]interface{}, error)
-	Logout(loginData map[string]interface{}) error
-	Get(loginData, extraConfig map[string]interface{}) (interface{}, error)
+	Login(target string, logger log.Logger) (map[string]interface{}, error)
+	Logout(loginData map[string]interface{}, logger log.Logger) error
+	Get(loginData, extraConfig map[string]interface{}, logger log.Logger) (interface{}, error)
 }
 
 type ScrapeMetrics struct {

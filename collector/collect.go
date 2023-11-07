@@ -13,7 +13,7 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 
 	begin := time.Now()
 
-	clientData, err := cs.clientAPI.Login(cs.target)
+	clientData, err := cs.clientAPI.Login(cs.target, cs.logger)
 	if err != nil {
 
 		level.Error(cs.logger).Log("msg", "Login failed", "target", clientData["target"], "err", err)
@@ -61,7 +61,7 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 
 	lobegin := time.Now()
 
-	if err := cs.clientAPI.Logout(clientData); err != nil {
+	if err := cs.clientAPI.Logout(clientData, cs.logger); err != nil {
 
 		level.Error(cs.logger).Log("msg", "Logout failed", "target", clientData["target"], "err", err)
 
