@@ -6,12 +6,12 @@ import (
 	"net/http"
 
 	"github.com/prezhdarov/prometheus-exporter/collector"
+	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/version"
 )
 
 type eHandler struct {
@@ -42,7 +42,7 @@ func (h *eHandler) New(namespace, target string, params map[string]string) (http
 	}
 
 	registry := prometheus.NewRegistry()
-	registry.MustRegister(version.NewCollector(fmt.Sprintf("%s_exporter", namespace)))
+	registry.MustRegister(versioncollector.NewCollector(fmt.Sprintf("%s_exporter", namespace)))
 	if err := registry.Register(&cl); err != nil {
 		return nil, fmt.Errorf("could not register %s collector: %s", namespace, err)
 	}
