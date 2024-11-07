@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -12,8 +13,7 @@ import (
 	"github.com/prezhdarov/prometheus-exporter/config"
 	"github.com/prezhdarov/prometheus-exporter/exporter"
 
-	"github.com/go-kit/log/level"
-	"github.com/prometheus/common/promlog"
+	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/exporter-toolkit/web"
 )
 
@@ -51,10 +51,10 @@ func main() {
 	config.Parse()
 
 	// This exporter uses prometheys logger (promlog) extensively and even passes it to the collectors to log their endeavours
-	logger := promlog.New(config.SetLogger(logFormat, logLevel))
+	logger := promslog.New(config.SetLogger(logFormat, logLevel))
 
 	// Tells us if we have the /metrics is disabled in debug in case we begin to wonder why nothing comes out..
-	level.Debug(logger).Log("disable exporter target is", disableExporterTarget)
+	logger.Debug("disable exporter target is", fmt.Sprintf("%v", disableExporterTarget), nil)
 
 	// This is my awkward way of loading the so called API reader. Don't judge!
 	api.Load(logger)
@@ -81,14 +81,14 @@ func main() {
 	})
 
 	// Tell us essentially if exporter has managed to bind to the configured address (or shout out an error if not)
-	level.Info(logger).Log("msg", "listening on", "address", listenAddress)
+	logger.Info("msg", "listening on", "address", *listenAddress, nil)
 
 	// Prometheus toolkit changed a little since version 0.8 (I think) and now configuring the http server takes a slightly more complicated approach that requires a Web Config.
 	// Below is the final step needed to start the exporter - create a http server... I think again.. It is borrowed.
 	server := &http.Server{}
 
 	if err := web.ListenAndServe(server, config.WebConfig(listenAddress), logger); err != nil {
-		level.Error(logger).Log("err", err)
+		logger.Error("err", fmt.Sprint(err), nil)
 		os.Exit(1)
 	}
 

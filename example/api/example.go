@@ -2,19 +2,18 @@ package api
 
 import (
 	"flag"
+	"log/slog"
 
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/prezhdarov/prometheus-exporter/collector"
 )
 
 var (
 	// This is example of all things necessary for simple http (REST anyone?) API configuration. Get all these defined and let the feast begin.
-	apiUser   = flag.String("api.username", "", "Username to login")
-	apiPasswd = flag.String("api.password", "", "Password for the user above")
+	//apiUser   = flag.String("api.username", "", "Username to login")
+	//apiPasswd = flag.String("api.password", "", "Password for the user above")
 	apiServer = flag.String("api.server", "", "Server address in host:port format.")
-	apiSchema = flag.String("api.schema", "https", "Use HTTP or HTTPS")
-	apiSSL    = flag.Bool("api.ssl", false, "Trust SSL or trust")
+	//apiSchema = flag.String("api.schema", "https", "Use HTTP or HTTPS")
+	//apiSSL    = flag.Bool("api.ssl", false, "Trust SSL or trust")
 )
 
 // Nothing to see here..
@@ -23,9 +22,9 @@ type APIClient struct {
 }
 
 // If someone comes with more elegant way to load this into the main program (that sentence feels like 1960s... all we need is a punch card )
-func Load(logger log.Logger) {
+func Load(logger *slog.Logger) {
 
-	level.Info(logger).Log("msg", "Loading Example API")
+	logger.Info("msg", "Loading Example API", nil)
 
 }
 
@@ -44,7 +43,7 @@ func NewAPI() *APIClient {
 
 // The Login function. Takes a target name or address as input and returns a map where anything can be stored. From API key to set of cookes - you name it.
 // Not sure this - the return map of string and anything -  is as elegant as I want it to be, but quite handy.
-func (vm *APIClient) Login(target string, logger log.Logger) (map[string]interface{}, error) {
+func (vm *APIClient) Login(target string, logger *slog.Logger) (map[string]interface{}, error) {
 
 	loginData := make(map[string]interface{}, 0)
 
@@ -54,7 +53,7 @@ func (vm *APIClient) Login(target string, logger log.Logger) (map[string]interfa
 
 	}
 
-	level.Info(logger).Log("msg", "Logged in successfully")
+	logger.Info("msg", "Logged in successfully", nil)
 
 	loginData["target"] = target
 
@@ -62,18 +61,18 @@ func (vm *APIClient) Login(target string, logger log.Logger) (map[string]interfa
 }
 
 // The Logout - just pass the map created in Login... Your logout should know what to do with it (if anything at all)
-func (vm *APIClient) Logout(loginData map[string]interface{}, logger log.Logger) error {
+func (vm *APIClient) Logout(loginData map[string]interface{}, logger *slog.Logger) error {
 
-	level.Info(logger).Log("msg", "Logged in successfully")
+	logger.Info("msg", "Logged in successfully", nil)
 
 	return nil
 
 }
 
 // This one can return virtually anything... and an error. To each (API and exporter) their own as they say.
-func (vm *APIClient) Get(loginData, extraConfig map[string]interface{}, logger log.Logger) (interface{}, error) {
+func (vm *APIClient) Get(loginData, extraConfig map[string]interface{}, logger *slog.Logger) (interface{}, error) {
 
-	level.Info(logger).Log("msg", "Ran GET successfully")
+	logger.Info("msg", "Ran GET successfully", nil)
 
 	return nil, nil
 

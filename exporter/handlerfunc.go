@@ -2,15 +2,14 @@ package exporter
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraParams string, logger log.Logger) {
+func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraParams string, logger *slog.Logger) {
 
 	p := r.URL.Query()
 
@@ -23,10 +22,10 @@ func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraPa
 	}
 
 	if target == "" {
-		level.Warn(logger).Log("msg", "No target specified.")
+		logger.Warn("msg", "No target specified.", nil)
 		return
 	} else {
-		level.Debug(logger).Log("msg", fmt.Sprintf("Scraping %s", target))
+		logger.Debug("msg", fmt.Sprintf("Scraping %s", target), nil)
 	}
 
 	h := &eHandler{

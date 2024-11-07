@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/prometheus/common/promlog"
+	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/exporter-toolkit/web"
 	"gopkg.in/yaml.v2"
 )
@@ -92,14 +92,14 @@ func Parse() {
 
 }
 
-func SetLogger(lf, ll *string) *promlog.Config {
-	promlogFormat := &promlog.AllowedFormat{}
+func SetLogger(lf, ll *string) *promslog.Config {
+	promlogFormat := &promslog.AllowedFormat{}
 	promlogFormat.Set(*lf)
 
-	promlogLevel := &promlog.AllowedLevel{}
+	promlogLevel := &promslog.AllowedLevel{}
 	promlogLevel.Set(*ll)
 
-	promlogConfig := &promlog.Config{}
+	promlogConfig := &promslog.Config{}
 	promlogConfig.Format = promlogFormat
 	promlogConfig.Level = promlogLevel
 

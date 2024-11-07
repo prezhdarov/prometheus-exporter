@@ -2,14 +2,12 @@ package exporter
 
 import (
 	"fmt"
-	stdlog "log"
+	"log/slog"
 	"net/http"
 
 	"github.com/prezhdarov/prometheus-exporter/collector"
 	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -20,7 +18,7 @@ type eHandler struct {
 	includeExporterMetrics  bool
 	disableExporterTarget   bool
 	maxRequests             int
-	logger                  log.Logger
+	logger                  *slog.Logger
 }
 
 func (h *eHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +30,7 @@ func (h *eHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h *eHandler) New(namespace, target string, params map[string]string) (http.Handler, error) {
 
 	if h.disableExporterTarget {
-		level.Info(h.logger).Log("msg", "/metrics target is disabled. Serving exporter metrics only")
+		h.logger.Info("msg", "/metrics target is disabled. Serving exporter metrics only", nil)
 		return promhttp.Handler(), nil
 	}
 
@@ -50,7 +48,7 @@ func (h *eHandler) New(namespace, target string, params map[string]string) (http
 	handler := promhttp.HandlerFor(
 		prometheus.Gatherers{h.exporterMetricsRegistry, registry},
 		promhttp.HandlerOpts{
-			ErrorLog:      stdlog.New(log.NewStdlibAdapter(level.Error(h.logger)), "", 0),
+			ErrorLog:      slog.NewLogLogger(h.logger.Handler(), slog.LevelError),
 			ErrorHandling: promhttp.ContinueOnError,
 			Registry:      h.exporterMetricsRegistry,
 		},

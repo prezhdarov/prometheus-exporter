@@ -3,18 +3,16 @@ package collector
 import (
 	"flag"
 	"fmt"
+	"log/slog"
 	"sync"
-
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 type ClientAPI interface {
-	Login(target string, logger log.Logger) (map[string]interface{}, error)
-	Logout(loginData map[string]interface{}, logger log.Logger) error
-	Get(loginData, extraConfig map[string]interface{}, logger log.Logger) (interface{}, error)
+	Login(target string, logger *slog.Logger) (map[string]interface{}, error)
+	Logout(loginData map[string]interface{}, logger *slog.Logger) error
+	Get(loginData, extraConfig map[string]interface{}, logger *slog.Logger) (interface{}, error)
 }
 
 type ScrapeMetrics struct {
@@ -33,7 +31,7 @@ type CollectorSet struct {
 	target        string
 	namespace     string
 	extraParams   map[string]string
-	logger        log.Logger
+	logger        *slog.Logger
 	ScrapeMetrics ScrapeMetrics
 }
 
@@ -46,7 +44,7 @@ var disableDefaultCollector = flag.Bool("disable.default.collectors", DefaultDis
 
 var (
 	registeredClientAPI    ClientAPI
-	factories              = make(map[string]func(logger log.Logger) (Collector, error))
+	factories              = make(map[string]func(logger *slog.Logger) (Collector, error))
 	collectorState         = make(map[string]*bool)
 	initiatedCollectorsMtx = sync.Mutex{}
 	initiatedCollectors    = make(map[string]Collector)
@@ -74,13 +72,13 @@ func RegisterAPI(clientAPI ClientAPI) {
 	registeredClientAPI = clientAPI
 }
 
-func RegisterCollector(collector string, flag *bool, factory func(logger log.Logger) (Collector, error)) {
+func RegisterCollector(collector string, flag *bool, factory func(logger *slog.Logger) (Collector, error)) {
 
 	collectorState[collector] = flag
 	factories[collector] = factory
 }
 
-func NewCollectorSet(namespace, target string, params map[string]string, logger log.Logger) (CollectorSet, error) {
+func NewCollectorSet(namespace, target string, params map[string]string, logger *slog.Logger) (CollectorSet, error) {
 
 	var sm ScrapeMetrics
 
@@ -111,16 +109,16 @@ func NewCollectorSet(namespace, target string, params map[string]string, logger 
 	for key, enabled := range collectorState {
 
 		if !*enabled || (len(f) > 0 && !f[key]) {
-			level.Debug(logger).Log("msg", fmt.Sprintf("Collector %s is disabled", key))
+			logger.Debug("msg", fmt.Sprintf("Collector %s is disabled", key), nil)
 			continue
 		}
 
-		level.Debug(logger).Log("msg", fmt.Sprintf("Collector %s is enabled", key))
+		logger.Debug("msg", fmt.Sprintf("Collector %s is enabled", key), nil)
 
 		if collector, ok := initiatedCollectors[key]; ok {
 			collectors[key] = collector
 		} else {
-			collector, err := factories[key](log.With(logger, "collector", key))
+			collector, err := factories[key](logger.With("collector", key))
 			if err != nil {
 				return CollectorSet{}, err
 			}

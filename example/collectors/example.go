@@ -3,10 +3,9 @@ package exampleCollectors
 import (
 	"flag"
 	"fmt"
+	"log/slog"
 	"time"
 
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/prezhdarov/prometheus-exporter/collector"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -20,12 +19,12 @@ var testCollectorFlag = flag.Bool("test.collector", collector.DefaultEnabled, fm
 
 // The collector itself
 type testCollector struct {
-	logger log.Logger
+	logger *slog.Logger
 }
 
 // Load is my silly way to.... well, load the collector set - i.e. all enabled collectors in the package at exporter start.
-func Load(logger log.Logger) {
-	level.Info(logger).Log("msg", "Loading Example collector set")
+func Load(logger *slog.Logger) {
+	logger.Info("msg", "Loading Example collector set", nil)
 }
 
 // This adds the collector to the set of collectors to be used during Collect phase. The testCollectorFlag is used to either set the collector as enabled or disabled (bool)
@@ -34,7 +33,7 @@ func init() {
 }
 
 // The Baron survives another drowning... just..
-func NewTestCollector(logger log.Logger) (collector.Collector, error) {
+func NewTestCollector(logger *slog.Logger) (collector.Collector, error) {
 	return &testCollector{logger}, nil
 }
 

@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -16,12 +15,12 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 	clientData, err := cs.clientAPI.Login(cs.target, cs.logger)
 	if err != nil {
 
-		level.Error(cs.logger).Log("msg", "Login failed", "target", clientData["target"], "err", err)
+		cs.logger.Error("msg", "Login failed", "target", clientData["target"], "err", err)
 		return
 
 	} else {
 
-		level.Debug(cs.logger).Log("msg", "Login successful", "target", clientData["target"])
+		cs.logger.Debug("msg", "Login successful", "target", clientData["target"])
 
 	}
 
@@ -29,7 +28,7 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 
 	wg := sync.WaitGroup{}
 
-	level.Debug(cs.logger).Log("msg", fmt.Sprintf("number of collectors to scrape: %d", len(cs.Collectors)))
+	cs.logger.Debug("msg", fmt.Sprintf("number of collectors to scrape: %d", len(cs.Collectors)), nil)
 
 	wg.Add(len(cs.Collectors))
 	for name, c := range cs.Collectors {
@@ -44,10 +43,10 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 			var success float64
 
 			if err != nil {
-				level.Error(cs.logger).Log("msg", "collector failed", "name", name, "duration_seconds", duration.Seconds(), "err", err)
+				cs.logger.Error("msg", "collector failed", "name", name, "duration_seconds", fmt.Sprintf("%f", duration.Seconds()), "err", fmt.Sprintf("%s", err), nil)
 				success = 0
 			} else {
-				level.Debug(cs.logger).Log("msg", "collector scraped successfully", "target", clientData["target"].(string), "name", name, "duration", duration.Seconds())
+				cs.logger.Debug("msg", "collector scraped successfully", "target", clientData["target"].(string), "name", name, "duration", fmt.Sprintf("%f", duration.Seconds()), nil)
 				success = 1
 			}
 			ch <- prometheus.MustNewConstMetric(cs.ScrapeMetrics.Duration, prometheus.GaugeValue, duration.Seconds(), name)
@@ -63,11 +62,11 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 
 	if err := cs.clientAPI.Logout(clientData, cs.logger); err != nil {
 
-		level.Error(cs.logger).Log("msg", "Logout failed", "target", clientData["target"], "err", err)
+		cs.logger.Error("msg", "Logout failed", "target", clientData["target"], "err", err, nil)
 
 	} else {
 
-		level.Debug(cs.logger).Log("msg", "Logout successful", "target", clientData["target"])
+		cs.logger.Debug("msg", "Logout successful", "target", clientData["target"], nil)
 
 	}
 

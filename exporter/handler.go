@@ -2,13 +2,13 @@ package exporter
 
 import (
 	"fmt"
+	"log/slog"
 
-	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 )
 
-func CreateHandler(includeExporerMetrics, disableExporterTarget bool, maxRequests int, namespace string, logger log.Logger) *eHandler {
+func CreateHandler(includeExporerMetrics, disableExporterTarget bool, maxRequests int, namespace string, logger *slog.Logger) *eHandler {
 	h := &eHandler{
 		exporterMetricsRegistry: prometheus.NewRegistry(),
 		includeExporterMetrics:  includeExporerMetrics,
