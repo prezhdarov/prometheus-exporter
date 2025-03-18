@@ -93,10 +93,10 @@ func Parse() {
 }
 
 func SetLogger(lf, ll *string) *promslog.Config {
-	promlogFormat := &promslog.AllowedFormat{}
+	promlogFormat := promslog.NewFormat()
 	promlogFormat.Set(*lf)
 
-	promlogLevel := &promslog.AllowedLevel{}
+	promlogLevel := promslog.NewLevel()
 	promlogLevel.Set(*ll)
 
 	promlogConfig := &promslog.Config{}
