@@ -9,7 +9,7 @@ import (
 
 	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/exporter-toolkit/web"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var (
