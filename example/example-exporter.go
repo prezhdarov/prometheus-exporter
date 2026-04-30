@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"net/http"
 	"os"
 
@@ -54,7 +53,7 @@ func main() {
 	logger := promslog.New(config.SetLogger(logFormat, logLevel))
 
 	// Tells us if we have the /metrics is disabled in debug in case we begin to wonder why nothing comes out..
-	logger.Debug("disable exporter target is", fmt.Sprintf("%v", disableExporterTarget), nil)
+	logger.Debug("disable exporter target", "value", *disableExporterTarget)
 
 	// This is my awkward way of loading the so called API reader. Don't judge!
 	api.Load(logger)
@@ -81,14 +80,14 @@ func main() {
 	})
 
 	// Tell us essentially if exporter has managed to bind to the configured address (or shout out an error if not)
-	logger.Info("msg", "listening on", "address", *listenAddress, nil)
+	logger.Info("listening on", "address", *listenAddress)
 
 	// Prometheus toolkit changed a little since version 0.8 (I think) and now configuring the http server takes a slightly more complicated approach that requires a Web Config.
 	// Below is the final step needed to start the exporter - create a http server... I think again.. It is borrowed.
 	server := &http.Server{}
 
 	if err := web.ListenAndServe(server, config.WebConfig(listenAddress), logger); err != nil {
-		logger.Error("err", fmt.Sprint(err), nil)
+		logger.Error("server error", "err", err)
 		os.Exit(1)
 	}
 

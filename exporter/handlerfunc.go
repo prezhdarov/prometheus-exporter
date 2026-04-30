@@ -1,7 +1,6 @@
 package exporter
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -22,10 +21,10 @@ func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraPa
 	}
 
 	if target == "" {
-		logger.Warn("msg", "No target specified.", nil)
+		http.Error(w, "target parameter is required", http.StatusBadRequest)
 		return
 	} else {
-		logger.Debug("msg", fmt.Sprintf("Scraping %s", target), nil)
+		logger.Debug("scraping target", "target", target)
 	}
 
 	h := &eHandler{
@@ -37,7 +36,8 @@ func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraPa
 	}
 
 	if handler, err := h.New(namespace, target, params); err != nil {
-		panic(fmt.Sprintf("could not create metrics handler: %s", err))
+		http.Error(w, "could not create metrics handler: "+err.Error(), http.StatusInternalServerError)
+		return
 	} else {
 		h.eHandler = handler
 

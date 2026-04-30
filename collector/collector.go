@@ -2,7 +2,6 @@ package collector
 
 import (
 	"flag"
-	"fmt"
 	"log/slog"
 	"sync"
 
@@ -10,9 +9,9 @@ import (
 )
 
 type ClientAPI interface {
-	Login(target string, logger *slog.Logger) (map[string]interface{}, error)
-	Logout(loginData map[string]interface{}, logger *slog.Logger) error
-	Get(loginData, extraConfig map[string]interface{}, logger *slog.Logger) (interface{}, error)
+	Login(target string, logger *slog.Logger) (map[string]any, error)
+	Logout(loginData map[string]any, logger *slog.Logger) error
+	Get(loginData, extraConfig map[string]any, logger *slog.Logger) (any, error)
 }
 
 type ScrapeMetrics struct {
@@ -22,7 +21,7 @@ type ScrapeMetrics struct {
 
 // Collector is the interface a collector has to implement.
 type Collector interface {
-	Update(ch chan<- prometheus.Metric, namespace string, clientAPI ClientAPI, clientData map[string]interface{}, extraParams map[string]string) error
+	Update(ch chan<- prometheus.Metric, namespace string, clientAPI ClientAPI, clientData map[string]any, extraParams map[string]string) error
 }
 
 type CollectorSet struct {
@@ -53,7 +52,7 @@ var (
 func isFlagPassed(name string) bool {
 	found := false
 	flag.Visit(func(f *flag.Flag) {
-		if f.Name == fmt.Sprintf("collector.%s", name) {
+		if f.Name == "collector."+name {
 			found = true
 		}
 	})
@@ -96,7 +95,6 @@ func NewCollectorSet(namespace, target string, params map[string]string, logger 
 		nil,
 	)
 
-	f := make(map[string]bool)
 	collectors := make(map[string]Collector)
 
 	initiatedCollectorsMtx.Lock()
@@ -108,12 +106,12 @@ func NewCollectorSet(namespace, target string, params map[string]string, logger 
 
 	for key, enabled := range collectorState {
 
-		if !*enabled || (len(f) > 0 && !f[key]) {
-			logger.Debug("msg", fmt.Sprintf("Collector %s is disabled", key), nil)
+		if !*enabled {
+			logger.Debug("collector disabled", "name", key)
 			continue
 		}
 
-		logger.Debug("msg", fmt.Sprintf("Collector %s is enabled", key), nil)
+		logger.Debug("collector enabled", "name", key)
 
 		if collector, ok := initiatedCollectors[key]; ok {
 			collectors[key] = collector

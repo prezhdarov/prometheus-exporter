@@ -1,7 +1,6 @@
 package collector
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -15,12 +14,12 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 	clientData, err := cs.clientAPI.Login(cs.target, cs.logger)
 	if err != nil {
 
-		cs.logger.Error("msg", "Login failed", "target", clientData["target"], "err", err)
+		cs.logger.Error("Login failed", "target", clientData["target"], "err", err)
 		return
 
 	} else {
 
-		cs.logger.Debug("msg", "Login successful", "target", clientData["target"])
+		cs.logger.Debug("Login successful", "target", clientData["target"])
 
 	}
 
@@ -28,11 +27,12 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 
 	wg := sync.WaitGroup{}
 
-	cs.logger.Debug("msg", fmt.Sprintf("number of collectors to scrape: %d", len(cs.Collectors)), nil)
+	cs.logger.Debug("number of collectors to scrape", "count", len(cs.Collectors))
 
 	wg.Add(len(cs.Collectors))
 	for name, c := range cs.Collectors {
 		go func(name string, c Collector) {
+			defer wg.Done()
 
 			begin := time.Now()
 
@@ -43,16 +43,14 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 			var success float64
 
 			if err != nil {
-				cs.logger.Error("msg", "collector failed", "name", name, "duration_seconds", fmt.Sprintf("%f", duration.Seconds()), "err", fmt.Sprintf("%s", err), nil)
+				cs.logger.Error("collector failed", "name", name, "duration_seconds", duration.Seconds(), "err", err)
 				success = 0
 			} else {
-				cs.logger.Debug("msg", "collector scraped successfully", "target", clientData["target"].(string), "name", name, "duration", fmt.Sprintf("%f", duration.Seconds()), nil)
+				cs.logger.Debug("collector scraped successfully", "target", clientData["target"].(string), "name", name, "duration_seconds", duration.Seconds())
 				success = 1
 			}
 			ch <- prometheus.MustNewConstMetric(cs.ScrapeMetrics.Duration, prometheus.GaugeValue, duration.Seconds(), name)
 			ch <- prometheus.MustNewConstMetric(cs.ScrapeMetrics.Success, prometheus.GaugeValue, success, name)
-
-			wg.Done()
 		}(name, c)
 	}
 
@@ -62,11 +60,11 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 
 	if err := cs.clientAPI.Logout(clientData, cs.logger); err != nil {
 
-		cs.logger.Error("msg", "Logout failed", "target", clientData["target"], "err", err, nil)
+		cs.logger.Error("Logout failed", "target", clientData["target"], "err", err)
 
 	} else {
 
-		cs.logger.Debug("msg", "Logout successful", "target", clientData["target"], nil)
+		cs.logger.Debug("Logout successful", "target", clientData["target"])
 
 	}
 

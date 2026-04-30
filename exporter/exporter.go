@@ -30,19 +30,19 @@ func (h *eHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h *eHandler) New(namespace, target string, params map[string]string) (http.Handler, error) {
 
 	if h.disableExporterTarget {
-		h.logger.Info("msg", "/metrics target is disabled. Serving exporter metrics only", nil)
+		h.logger.Info("/metrics target is disabled, serving exporter metrics only")
 		return promhttp.Handler(), nil
 	}
 
 	cl, err := collector.NewCollectorSet(namespace, target, params, h.logger)
 	if err != nil {
-		return nil, fmt.Errorf("could not create %s collector: %s", namespace, err)
+		return nil, fmt.Errorf("could not create %s collector: %w", namespace, err)
 	}
 
 	registry := prometheus.NewRegistry()
 	registry.MustRegister(versioncollector.NewCollector(fmt.Sprintf("%s_exporter", namespace)))
 	if err := registry.Register(&cl); err != nil {
-		return nil, fmt.Errorf("could not register %s collector: %s", namespace, err)
+		return nil, fmt.Errorf("could not register %s collector: %w", namespace, err)
 	}
 
 	handler := promhttp.HandlerFor(

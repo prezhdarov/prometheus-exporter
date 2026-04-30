@@ -15,7 +15,7 @@ const (
 	testSubsystem = "test"
 )
 
-var testCollectorFlag = flag.Bool("test.collector", collector.DefaultEnabled, fmt.Sprintf("Enable the %s collector (default: %v)", testSubsystem, collector.DefaultEnabled))
+var testCollectorFlag = flag.Bool("collector.test", collector.DefaultEnabled, fmt.Sprintf("Enable the %s collector (default: %v)", testSubsystem, collector.DefaultEnabled))
 
 // The collector itself
 type testCollector struct {
@@ -24,7 +24,7 @@ type testCollector struct {
 
 // Load is my silly way to.... well, load the collector set - i.e. all enabled collectors in the package at exporter start.
 func Load(logger *slog.Logger) {
-	logger.Info("msg", "Loading Example collector set", nil)
+	logger.Info("loading example collector set")
 }
 
 // This adds the collector to the set of collectors to be used during Collect phase. The testCollectorFlag is used to either set the collector as enabled or disabled (bool)
@@ -38,9 +38,9 @@ func NewTestCollector(logger *slog.Logger) (collector.Collector, error) {
 }
 
 // This is where the magic happens. Here clientAPI.Get can be consumed and metrics created with the result and pushed out.
-func (c *testCollector) Update(ch chan<- prometheus.Metric, namespace string, clientAPI collector.ClientAPI, loginData map[string]interface{}, params map[string]string) error {
+func (c *testCollector) Update(ch chan<- prometheus.Metric, namespace string, clientAPI collector.ClientAPI, loginData map[string]any, params map[string]string) error {
 
-	extraConfig := make(map[string]interface{}, 0)
+	extraConfig := make(map[string]any, 0)
 
 	clientAPI.Get(loginData, extraConfig, c.logger)
 
