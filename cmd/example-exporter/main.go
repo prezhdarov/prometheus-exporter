@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/prezhdarov/prometheus-exporter/example/api"
+	"github.com/prezhdarov/prometheus-exporter/internal/api"
 
-	exampleCollectors "github.com/prezhdarov/prometheus-exporter/example/collectors"
+	exampleCollectors "github.com/prezhdarov/prometheus-exporter/internal/collectors"
 
-	"github.com/prezhdarov/prometheus-exporter/config"
-	"github.com/prezhdarov/prometheus-exporter/exporter"
+	"github.com/prezhdarov/prometheus-exporter/pkg/config"
+	"github.com/prezhdarov/prometheus-exporter/pkg/exporter"
 
 	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/exporter-toolkit/web"

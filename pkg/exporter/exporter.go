@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/prezhdarov/prometheus-exporter/collector"
+	"github.com/prezhdarov/prometheus-exporter/pkg/collector"
 	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 
 	"github.com/prometheus/client_golang/prometheus"

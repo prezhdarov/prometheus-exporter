@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log/slog"
 
-	"github.com/prezhdarov/prometheus-exporter/collector"
+	"github.com/prezhdarov/prometheus-exporter/pkg/collector"
 )
 
 var (
