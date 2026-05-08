@@ -1,12 +1,25 @@
 package exporter
 
 import (
+	"bytes"
 	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
+
+// bufferedResponseWriter captures the handler response so the status code
+// can be overridden before committing bytes to the real ResponseWriter.
+type bufferedResponseWriter struct {
+	header     http.Header
+	body       bytes.Buffer
+	statusCode int
+}
+
+func (b *bufferedResponseWriter) Header() http.Header         { return b.header }
+func (b *bufferedResponseWriter) Write(p []byte) (int, error) { return b.body.Write(p) }
+func (b *bufferedResponseWriter) WriteHeader(statusCode int)  { b.statusCode = statusCode }
 
 func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraParams string, logger *slog.Logger) {
 
@@ -43,5 +56,21 @@ func CreateHandleFunc(w http.ResponseWriter, r *http.Request, namespace, extraPa
 
 	}
 
-	h.eHandler.ServeHTTP(w, r)
+	buf := &bufferedResponseWriter{
+		header:     make(http.Header),
+		statusCode: http.StatusOK,
+	}
+	h.eHandler.ServeHTTP(buf, r)
+
+	for k, vs := range buf.header {
+		for _, v := range vs {
+			w.Header().Add(k, v)
+		}
+	}
+	if h.ScrapeFailed() {
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		w.WriteHeader(buf.statusCode)
+	}
+	w.Write(buf.body.Bytes()) //nolint:errcheck
 }
