@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log/slog"
 	"sync"
+	"sync/atomic"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -25,13 +26,15 @@ type Collector interface {
 }
 
 type CollectorSet struct {
-	Collectors    map[string]Collector
-	clientAPI     ClientAPI
-	target        string
-	namespace     string
-	extraParams   map[string]string
-	logger        *slog.Logger
-	ScrapeMetrics ScrapeMetrics
+	Collectors          map[string]Collector
+	clientAPI           ClientAPI
+	target              string
+	namespace           string
+	extraParams         map[string]string
+	logger              *slog.Logger
+	ScrapeMetrics       ScrapeMetrics
+	loginFailed         bool
+	collectorsSucceeded int32
 }
 
 const (
@@ -143,4 +146,14 @@ func NewCollectorSet(namespace, target string, params map[string]string, logger 
 func (cs *CollectorSet) Describe(ch chan<- *prometheus.Desc) {
 	ch <- cs.ScrapeMetrics.Duration
 	ch <- cs.ScrapeMetrics.Success
+}
+
+// ScrapeFailed reports whether the scrape should be considered a fatal failure:
+// true if login failed, or if login succeeded but zero collectors produced data.
+// Only valid after Collect() has returned.
+func (cs *CollectorSet) ScrapeFailed() bool {
+	if cs.loginFailed {
+		return true
+	}
+	return len(cs.Collectors) > 0 && atomic.LoadInt32(&cs.collectorsSucceeded) == 0
 }

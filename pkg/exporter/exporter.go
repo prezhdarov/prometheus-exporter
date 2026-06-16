@@ -19,6 +19,15 @@ type eHandler struct {
 	disableExporterTarget   bool
 	maxRequests             int
 	logger                  *slog.Logger
+	collectorSet            *collector.CollectorSet
+}
+
+// ScrapeFailed reports whether the most recent probe scrape was a fatal failure.
+func (h *eHandler) ScrapeFailed() bool {
+	if h.collectorSet == nil {
+		return false
+	}
+	return h.collectorSet.ScrapeFailed()
 }
 
 func (h *eHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +47,7 @@ func (h *eHandler) New(namespace, target string, params map[string]string) (http
 	if err != nil {
 		return nil, fmt.Errorf("could not create %s collector: %w", namespace, err)
 	}
+	h.collectorSet = &cl
 
 	registry := prometheus.NewRegistry()
 	registry.MustRegister(versioncollector.NewCollector(fmt.Sprintf("%s_exporter", namespace)))

@@ -2,6 +2,7 @@ package collector
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -14,6 +15,7 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 	clientData, err := cs.clientAPI.Login(cs.target, cs.logger)
 	if err != nil {
 
+		cs.loginFailed = true
 		cs.logger.Error("Login failed", "target", clientData["target"], "err", err)
 		return
 
@@ -46,6 +48,7 @@ func (cs *CollectorSet) Collect(ch chan<- prometheus.Metric) {
 				cs.logger.Error("collector failed", "name", name, "duration_seconds", duration.Seconds(), "err", err)
 				success = 0
 			} else {
+				atomic.AddInt32(&cs.collectorsSucceeded, 1)
 				cs.logger.Debug("collector scraped successfully", "target", clientData["target"].(string), "name", name, "duration_seconds", duration.Seconds())
 				success = 1
 			}
